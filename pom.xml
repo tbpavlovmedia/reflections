@@ -4,7 +4,7 @@
 
     <groupId>org.reflections</groupId>
     <artifactId>reflections</artifactId>
-    <version>0.9.12-SNAPSHOT</version>
+    <version>0.9.12</version>
 
     <name>Reflections</name>
     <description>Reflections - a Java runtime metadata analysis</description>
@@ -56,6 +56,7 @@
         <javassist.version>3.21.0-GA</javassist.version>
         <jdk.version>1.7</jdk.version>
         <additionalparam>-Xdoclint:none</additionalparam>
+        <bundle.category>JAX-RS</bundle.category>
     </properties>
 
     <dependencies>
@@ -151,7 +152,7 @@
                             </execution>
                         </executions>
                     </plugin>
-                    <plugin>
+                    <!-- <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
                         <executions>
@@ -165,10 +166,11 @@
                         <configuration>
                             <additionalparam>-Xdoclint:none</additionalparam>
                         </configuration>
-                    </plugin>
+                    </plugin> -->
                     <plugin>
                         <groupId>org.apache.felix</groupId>
                         <artifactId>maven-bundle-plugin</artifactId>
+                        <version>3.2.0</version>
                         <executions>
                             <execution>
                                 <id>bundle-manifest</id>
@@ -177,21 +179,59 @@
                                     <goal>manifest</goal>
                                 </goals>
                             </execution>
+                            <execution>
+                              <id>obr repository</id>
+                              <phase>install</phase>
+                              <goals>
+                                <goal>install</goal>
+                              </goals>
+                            </execution>
                         </executions>
+                        <extensions>true</extensions>
                         <configuration>
+                            <exportScr>true</exportScr>
+                            <obrRepository>${project.build.directory}/obr/repository.xml</obrRepository>
+                            <unpackBundle>true</unpackBundle>
                             <instructions>
                                 <Import-Package>
+                                    javax.annotation;version=!,
                                     org.jboss.vfs.*;resolution:=optional,
                                     *
                                 </Import-Package>
                                 <Export-Package>
                                     org.reflections.*
                                 </Export-Package>
+                                <Bundle-Version>${project.version}</Bundle-Version>
+                                <Bundle-Category>${bundle.category}</Bundle-Category>
                                 <Bundle-SymbolicName>org.reflections</Bundle-SymbolicName>
                             </instructions>
                         </configuration>
                     </plugin>
                     <plugin>
+                      <groupId>org.apache.maven.plugins</groupId>
+                      <artifactId>maven-dependency-plugin</artifactId>
+                      <executions>
+                        <execution>
+                          <id>copy-installed</id>
+                          <phase>verify</phase>
+                          <goals>
+                            <goal>copy</goal>
+                          </goals>
+                          <configuration>
+                            <artifactItems>
+                              <artifactItem>
+                                <groupId>${project.groupId}</groupId>
+                                <artifactId>${project.artifactId}</artifactId>
+                                <version>${project.version}</version>
+                                <type>${project.packaging}</type>
+                              </artifactItem>
+                            </artifactItems>
+                            <outputDirectory>${project.build.directory}/obr</outputDirectory>
+                          </configuration>
+                        </execution>
+                      </executions>
+                    </plugin>
+                    <!-- <plugin>
                         <artifactId>maven-enforcer-plugin</artifactId>
                         <executions>
                             <execution>
@@ -203,13 +243,13 @@
                                         <requireProperty>
                                             <property>gpg.keyname</property>
                                             <message>gpg.keyname must be supplied using -D.
-                                                create a key using gpg --gen-key or use existing one.
+                                                create a key using gpg gen-key or use existing one.
                                             </message>
                                         </requireProperty>
                                         <requireProperty>
                                             <property>gpg.passphrase</property>
                                             <message>gpg.passphrase must be supplied using -D.
-                                                create a key using gpg --gen-key or use existing one.
+                                                create a key using gpg gen-key or use existing one.
                                             </message>
                                         </requireProperty>
                                     </rules>
@@ -230,7 +270,7 @@
                                 </goals>
                             </execution>
                         </executions>
-                    </plugin>
+                    </plugin> -->
                 </plugins>
             </build>
         </profile>
